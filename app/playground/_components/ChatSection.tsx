@@ -14,10 +14,18 @@ type Props = {
 function ChatSecion({ messages, onSend, loading }: Props) {
   const [input, setInput] = useState<string>();
   const handleSend = () => {
-    if(!input?.trim()) return;
+    if(!input?.trim() || loading) return;
     onSend(input);
     setInput('');
   }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     
     <div className='w-96 shadow h-[90vh] p-4 flex flex-col'>
@@ -45,11 +53,13 @@ function ChatSecion({ messages, onSend, loading }: Props) {
       <div className='p-3 border-t flex items-center gap-2'>
         <textarea
         value={input}
+        disabled={loading}
         placeholder='Describe your website design idea'
         className='flex-1 resize-none border rounded-lg px-3 py-2 focus:outline-none focus:ring-2'
         onChange={(event) => setInput(event.target.value)}
+        onKeyDown={handleKeyDown}
         />
-        <Button onClick={handleSend}><ArrowUp/></Button>
+        <Button onClick={handleSend} disabled={loading || !input?.trim()}><ArrowUp/></Button>
       </div>
     </div>
   )

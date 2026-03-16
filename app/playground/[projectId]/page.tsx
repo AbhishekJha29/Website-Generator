@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PlaygroundHeader from '../_components/PlaygroundHeader'
 import WebsiteDesign from '../_components/WebsiteDesign'
 import ElementSettingsSection from '../_components/ElementSettingsSection'
@@ -93,9 +93,14 @@ function PlayGround() {
   const[loading, setLoading] = useState(false);
   const[messages, setMessages] = useState<Messages[]>([]);
   const [generatedCode, setGeneratedCode] = useState<any>();
+  
+  // Guard to prevent multiple initial triggers
+  const initialTriggerRef = useRef(false);
 
   useEffect(() => {
-    frameId && GetFrameDetails();
+    if (frameId) {
+      GetFrameDetails();
+    }
   }, [frameId])
   
   const GetFrameDetails = async () => {
@@ -118,7 +123,9 @@ function PlayGround() {
         }
       }
 
-      if (result.data?.chatMessages?.length === 1) {
+      // Only trigger initial generation once
+      if (result.data?.chatMessages?.length === 1 && !initialTriggerRef.current) {
+        initialTriggerRef.current = true;
         const userMsg = result.data?.chatMessages[0].content;
         SendMessage(userMsg);
       } else {
@@ -131,6 +138,9 @@ function PlayGround() {
   }
 
   const SendMessage = async (userInput:string) => {
+    // Guard against multiple calls
+    if (loading) return;
+    
     setLoading(true);
     setMessages((prev: any) => [
       ...prev,
@@ -143,6 +153,12 @@ function PlayGround() {
       messages:[{role:"user", content: Prompt?.replace('{userInput}', userInput)}]
     })
   });
+
+  if (!result.ok) {
+    toast.error("Failed to generate code");
+    setLoading(false);
+    return;
+  }
 
   const reader = result.body?.getReader();
   const decorder = new TextDecoder();

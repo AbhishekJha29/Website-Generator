@@ -78,7 +78,7 @@ function WebsiteDesign({ generatedCode }: Props) {
   const {onSaveData, setOnSaveData} = useContext(OnSaveContext)
   const { projectId} = useParams();
   const params = useSearchParams();
-  const frameId = params.get('frameid');
+  const frameId = params.get('frameId');
   // Track the current selected element reference internally to manage styles
   const internalSelectedElRef = useRef<HTMLElement | null>(null);
   const internalHoverElRef = useRef<HTMLElement | null>(null);
