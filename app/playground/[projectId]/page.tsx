@@ -99,20 +99,34 @@ function PlayGround() {
   }, [frameId])
   
   const GetFrameDetails = async () => {
-    const result = await axios.get('/api/frames?frameId='+frameId+"&projectId="+projectId);
-    console.log(result.data);
-    setFrameDetails(result.data);
+    try {
+      const result = await axios.get('/api/frames?frameId='+frameId+"&projectId="+projectId);
+      console.log('Fetched frame details:', result.data);
+      setFrameDetails(result.data);
 
-    const designCode = result.data?.designCode;
-    const index = designCode?.indexOf("```html") + 7;
-    const formattedCode = designCode?.slice(index);
-    setGeneratedCode(formattedCode);
+      const designCode = result.data?.designCode;
+      if (designCode) {
+        if (designCode.includes("```html")) {
+          const index = designCode.indexOf("```html") + 7;
+          let formattedCode = designCode.slice(index);
+          if (formattedCode.includes("```")) {
+            formattedCode = formattedCode.split("```")[0];
+          }
+          setGeneratedCode(formattedCode.trim());
+        } else {
+          setGeneratedCode(designCode.trim());
+        }
+      }
 
-    if(result.data?.chatMessages?.length == 1){
-      const userMsg = result.data?.chatMessages[0].content;
-      SendMessage(userMsg);
-    }else{
-      setMessages(result.data?.chatMessages)
+      if (result.data?.chatMessages?.length === 1) {
+        const userMsg = result.data?.chatMessages[0].content;
+        SendMessage(userMsg);
+      } else {
+        setMessages(result.data?.chatMessages || []);
+      }
+    } catch (error) {
+      console.error('Error fetching frame details:', error);
+      toast.error('Failed to load project details');
     }
   }
 
@@ -204,9 +218,6 @@ function PlayGround() {
 
       {/* WebsiteDesign */}
       <WebsiteDesign generatedCode={generatedCode?.replace('```', '')}/>
-
-      {/* Setting Section */}
-      {/* <ElementSettingsSection/> */}
       </div>
     </div>
   )

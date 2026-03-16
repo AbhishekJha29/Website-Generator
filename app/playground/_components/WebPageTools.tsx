@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Code2Icon, Download, Monitor, SquareArrowOutUpRight, TabletSmartphone } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import ViewCodeBlock from './ViewCodeBlock'
 
 const HTML_CODE = `
@@ -54,25 +54,41 @@ const HTML_CODE = `
 </html>`
 
 function WebPageTools({selectedScreenSize, setSelectedScreenSize, generatedCode}: any) {
-    const [finalCode, setFinalCode] = useState<string>()
-    useEffect(() => {
-        const cleanCode = (HTML_CODE.replace('{code}', generatedCode) || '')
-        .replaceAll("```html", '')
-        .replace('```', '')
-        .replace('html', '')
+    
+    const finalCode = useMemo(() => {
+        if (!generatedCode) return '';
+        
+        const cleanCode = generatedCode
+            .replaceAll("```html", '')
+            .replaceAll("```", '')
+            .replace("<html>", "")
+            .replace("</html>", "");
 
-        setFinalCode(cleanCode)
-    })
+        return HTML_CODE.replace('{code}', cleanCode);
+    }, [generatedCode]);
+
     const ViewInNewTab = () => {
         if(!finalCode) return ;
 
-        
-
-        const blob = new Blob([finalCode ?? ''], {type:'text/html'})
+        const blob = new Blob([finalCode], {type:'text/html'})
         const url = URL.createObjectURL(blob);
 
         window.open(url, "_blank")
     }
+
+    const downloadCode = () => {
+      if(!finalCode) return ;
+      const blob = new Blob([finalCode], {type: 'text/html'})
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url;
+      a.download='index.html'
+      document.body.appendChild(a)
+      a.click();
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url);
+    }
+
   return (
     <div className='p-2 shadow rounded-xl w-full flex items-center justify-between '>
       <div className='flex gap-2'>
@@ -80,15 +96,15 @@ function WebPageTools({selectedScreenSize, setSelectedScreenSize, generatedCode}
         className={`${selectedScreenSize == 'web'? 'border border-primary' : null}`} 
         onClick={() => setSelectedScreenSize('web')}><Monitor/></Button>
         <Button variant={'ghost'} 
-        className={`${selectedScreenSize == 'moblie'? 'border border-primary' : null}`}
-        onClick={() => setSelectedScreenSize('moblie')}><TabletSmartphone/></Button>
+        className={`${selectedScreenSize == 'mobile'? 'border border-primary' : null}`}
+        onClick={() => setSelectedScreenSize('mobile')}><TabletSmartphone/></Button>
       </div>
       <div className='flex gap-2'>
         <Button variant={'outline'} onClick={() => ViewInNewTab()}>View <SquareArrowOutUpRight/></Button>
         <ViewCodeBlock code={finalCode}>
-        <Button>View <Code2Icon/></Button>
+        <Button>Code <Code2Icon/></Button>
         </ViewCodeBlock>
-        <Button>Download <Download/></Button>
+        <Button onClick={downloadCode}>Download <Download/></Button>
       </div>
     </div>
   )

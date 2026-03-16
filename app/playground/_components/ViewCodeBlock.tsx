@@ -5,8 +5,13 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import React from 'react'
 import { Button } from '@/components/ui/button';
 import { Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 function ViewCodeBlock({ children, code }: any) {
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(code);
+        toast.success('Code Copied')
+    }
     return (
         <Dialog>
             {/* ✅ FIXED HERE ONLY */}
@@ -15,10 +20,10 @@ function ViewCodeBlock({ children, code }: any) {
             <DialogContent className='min-w-7xl max-h-[600px] overflow-auto'>
                 <DialogHeader>
                     <DialogTitle>
+                    <div className='flex gap-4 items-center'>
                         Source Code 
-                        <span>
-                            <Button><Copy/></Button>
-                        </span>
+                            <Button onClick={handleCopy}><Copy/></Button>
+                    </div>
                     </DialogTitle>
 
                     <DialogDescription asChild>
