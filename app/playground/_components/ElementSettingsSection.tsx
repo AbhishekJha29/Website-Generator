@@ -1,4 +1,4 @@
-import { SwatchBook } from "lucide-react";
+import { SwatchBook, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
   Select,
@@ -97,9 +97,12 @@ function ElementSettingSection({ selectedEl, clearSelection }: Props) {
 
   return (
     <div className="w-96 shadow p-4 space-y-4 overflow-auto h-[90vh] rounded-xl mt-2 mr-2">
-      <h2 className="flex gap-2 items-center font-bold">
-        <SwatchBook /> Settings
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="flex gap-2 items-center font-bold">
+          <SwatchBook /> Settings
+        </h2>
+        <X className="cursor-pointer" onClick={clearSelection} />
+      </div>
 
       {/* Font Size + Text Color inline */}
       <div className="flex items-center gap-4">

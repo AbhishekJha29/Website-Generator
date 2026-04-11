@@ -323,7 +323,17 @@ function WebsiteDesign({ generatedCode }: Props) {
 {selectedElement && (
   <div className="w-96 flex-shrink-0 bg-white border-l overflow-y-auto">
     {selectedElement.tagName === 'IMG' ? (
-      <ImageSettingSection selectedEl={selectedElement as HTMLImageElement} />
+      <ImageSettingSection 
+        selectedEl={selectedElement as HTMLImageElement} 
+        clearSelection={() => {
+          if (internalSelectedElRef.current) {
+            internalSelectedElRef.current.removeAttribute('data-selected');
+            internalSelectedElRef.current.removeAttribute('contenteditable');
+            internalSelectedElRef.current = null;
+          }
+          setSelectedElement(null);
+        }}
+      />
     ) : (
       <ElementSettingsSection 
         selectedEl={selectedElement} 

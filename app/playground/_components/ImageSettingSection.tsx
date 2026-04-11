@@ -7,6 +7,7 @@ import {
     Image as ImageUpscale, // no lucide-react upscale, using Image icon
     ImageMinus,
     Loader2Icon,
+    X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 
 type Props = {
     selectedEl: HTMLImageElement;
+    clearSelection: () => void;
 };
 
 const transformOptions = [
@@ -35,7 +37,7 @@ var imagekit = new ImageKit({
     urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!
 });
 
-function ImageSettingSection({ selectedEl }: Props) {
+function ImageSettingSection({ selectedEl, clearSelection }: Props) {
     const [altText, setAltText] = useState(selectedEl.alt || "");
     const [width, setWidth] = useState<number>(selectedEl.width || 300);
     const [height, setHeight] = useState<number>(selectedEl.height || 200);
@@ -126,9 +128,12 @@ function ImageSettingSection({ selectedEl }: Props) {
 
     return (
         <div className="w-96 shadow p-4 space-y-4">
-            <h2 className="flex gap-2 items-center font-bold">
-                <ImageIcon /> Image Settings
-            </h2>
+            <div className="flex justify-between items-center">
+                <h2 className="flex gap-2 items-center font-bold">
+                    <ImageIcon /> Image Settings
+                </h2>
+                <X className="cursor-pointer" onClick={clearSelection} />
+            </div>
 
             {/* Preview (clickable) */}
             <div className="flex justify-center">
