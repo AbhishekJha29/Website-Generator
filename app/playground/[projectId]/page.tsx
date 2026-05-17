@@ -92,7 +92,7 @@ function PlayGround() {
   const [frameDetails, setFrameDetails] = useState<Frame>();
   const[loading, setLoading] = useState(false);
   const[messages, setMessages] = useState<Messages[]>([]);
-  const [generatedCode, setGeneratedCode] = useState<any>();
+  const [generatedCode, setGeneratedCode] = useState<string>('');
   
   // Guard to prevent multiple initial triggers
   const initialTriggerRef = useRef(false);
@@ -178,7 +178,7 @@ function PlayGround() {
       isCode=true;
       const index = aiResponse.indexOf("```html")+7;
       const initialCodeChunk = aiResponse.slice(index);
-      setGeneratedCode((prev:any)=>prev+initialCodeChunk);
+      setGeneratedCode(initialCodeChunk);
     }else if(isCode){
       setGeneratedCode((prev:any) => prev+chunk);
     }
