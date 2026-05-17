@@ -41,7 +41,7 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
     const [altText, setAltText] = useState(selectedEl.alt || "");
     const [width, setWidth] = useState<number>(selectedEl.width || 300);
     const [height, setHeight] = useState<number>(selectedEl.height || 200);
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState<"upload" | "generate" | "transform" | null>(null);
     const [selectedImage, setSelectedImage] = useState<File>();
     const [borderRadius, setBorderRadius] = useState(
         selectedEl.style.borderRadius || "0px"
@@ -84,7 +84,7 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
 
     const saveUploadedFile = async () => {
         if (selectedImage) {
-            setLoading(true)
+            setLoading("upload")
             const imageRef = await imagekit.upload({
                 // @ts-ignore
                 file: selectedImage,
@@ -93,9 +93,11 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
             })
 
             console.log(imageRef);
+            const url = imageRef?.url + "?tr=";
             // @ts-ignore
-            selectedEl.setAttribute('src', imageRef?.url + "?tr=")
-            setLoading(false)
+            selectedEl.setAttribute('src', url)
+            setPreview(url);
+            setLoading(null)
         }
     }
 
@@ -104,7 +106,7 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
     };
 
     const GenerateAiImage = () => {
-        setLoading(true);
+        setLoading("generate");
 
         const url = `https://ik.imagekit.io/c8fffpbmak/ik-genimg-prompt-${altText}/${Date.now()}.png?tr=`
         setPreview(url);
@@ -112,18 +114,17 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
     }
 
     const ApplyTransformation = (trValue: string) => {
-        setLoading(true);
+        setLoading("transform");
 
+        let newUrl = preview;
         if (!preview.includes(trValue)) {
-            const url = preview + trValue + ','
-            setPreview(url)
-            selectedEl.setAttribute('src', url)
-        }else{
-            const url = preview.replaceAll(trValue+",","");
+            newUrl = preview + trValue + ','
+        } else {
+            newUrl = preview.replaceAll(trValue + ",", "");
         }
-        const url = preview + trValue + ','
-        setPreview(url);
-        selectedEl.setAttribute('src', url)
+        
+        setPreview(newUrl);
+        selectedEl.setAttribute('src', newUrl)
     }
 
     return (
@@ -142,7 +143,7 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
                     alt={altText}
                     className="max-h-40 object-contain border rounded cursor-pointer hover:opacity-80"
                     onClick={openFileDialog}
-                    onLoad={() => setLoading(false)}
+                    onLoad={() => setLoading(null)}
                 />
             </div>
 
@@ -161,9 +162,9 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
                 variant="outline"
                 className="w-full"
                 onClick={saveUploadedFile}
-                disabled={loading}
+                disabled={!!loading}
             >
-                {loading && <Loader2Icon className="animate-spin" />}    Upload Image
+                {loading === "upload" && <Loader2Icon className="animate-spin" />}    Upload Image
             </Button>
 
             {/* Alt text */}
@@ -178,7 +179,7 @@ function ImageSettingSection({ selectedEl, clearSelection }: Props) {
                 />
             </div>
 
-            <Button className="w-full" onClick={GenerateAiImage} disabled={loading}>{loading && <Loader2Icon className="animate-spin" />} Generate AI Image</Button>
+            <Button className="w-full" onClick={GenerateAiImage} disabled={!!loading}>{loading === "generate" && <Loader2Icon className="animate-spin" />} Generate AI Image</Button>
 
             {/* Transform Buttons */}
             <div>
